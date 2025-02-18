@@ -1,5 +1,5 @@
 import sys
-from lib.utils import get_spark_app_config, load_survey_df, count_by_country
+from lib.utils import get_spark_app_config, load_survey_df, count_by_country, advanced_stats
 from pyspark import SparkConf
 from pyspark.sql import *
 from lib.logger import Log4J
@@ -23,6 +23,9 @@ if __name__ == "__main__":
     partitioned_survey_df = survey_df.repartition(2)
 
     count_df = count_by_country(partitioned_survey_df)
+
+    # Advanced stats
+    advanced_stats(survey_df)
 
     logger.info(count_df.collect())
 
