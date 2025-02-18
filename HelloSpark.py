@@ -1,5 +1,5 @@
 import sys
-from lib.utils import get_spark_app_config, load_survey_df, count_by_country, advanced_stats
+from lib.utils import get_spark_app_config, load_survey_df, count_by_country, advanced_stats, corr_matrix
 from pyspark import SparkConf
 from pyspark.sql import *
 from lib.logger import Log4J
@@ -25,7 +25,22 @@ if __name__ == "__main__":
     count_df = count_by_country(partitioned_survey_df)
 
     # Advanced stats
+
     advanced_stats(survey_df)
+
+    # Correlation betweeen numerical columns and correlation matrix
+    numeric_columns = [
+        c for c, t in survey_df.dtypes if t in ['int', 'double']]
+    correlation_matrix = {}
+    for i in range(len(numeric_columns)):
+        for j in range(i + 1, len(numeric_columns)):
+            col1, col2 = numeric_columns[i], numeric_columns[j]
+            correlation = survey_df.stat.corr(col1, col2)
+            correlation_matrix[f"{col1} - {col2}"] = correlation
+    # 10. Afficher les corrélations
+    for pair, correlation in correlation_matrix.items():
+        print(f"Corrélation entre {pair}: {correlation}")
+    corr_matrix(survey_df)
 
     logger.info(count_df.collect())
 
